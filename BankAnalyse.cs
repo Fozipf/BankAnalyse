@@ -13,7 +13,7 @@ namespace BankAnalyse
 {
     public partial class FormBankAnalyse : Form
     {
-        private List<Transaction> allTransactions = new List<Transaction>();
+        private readonly List<Transaction> allTransactions = new List<Transaction>();
 
         public FormBankAnalyse()
         {
@@ -61,8 +61,57 @@ namespace BankAnalyse
                     ImportCSVFile(file);
                 }
             }
-
+           
             DisplayTransactions();
+            LblIncome.Text = String.Format("Summe Eingänge: {0:C2}", CalculateIncome(allTransactions));
+            LblExpenses.Text = String.Format("Summe Ausgänge: {0:C2}", CalculateExpenses(allTransactions));
+            LblAverageExpenses.Text = String.Format("Durchschnitt: {0:C2}", CalculateAvgExpensesPerMonth());
+        }
+
+        private double CalculateAvgExpensesPerMonth()
+        {
+            // Creating a copy of the transaction list, sort by date and then get the first and last item to
+            // calculate how much month are in between (first month inclusive)
+            Transaction[] transactionCopy = new Transaction[allTransactions.Count];
+            allTransactions.CopyTo(transactionCopy);
+            Array.Sort(transactionCopy);
+
+            Transaction earliestTransaction = transactionCopy[0];
+            Transaction latestTransaction = transactionCopy[transactionCopy.Length - 1];
+            int months = (latestTransaction.Date.Year - earliestTransaction.Date.Year) * 12 +
+                latestTransaction.Date.Month - earliestTransaction.Date.Month;
+            
+            return CalculateExpenses(allTransactions)/(months+1);
+        }
+
+        private double CalculateIncome(List<Transaction> transactions)
+        {
+            double sum=0;
+
+            foreach(var transaction in transactions)
+            {
+                if (transaction.Betrag > 0)
+                {
+                    sum += transaction.Betrag;
+                }
+            }
+
+            return sum;
+        }
+
+        private double CalculateExpenses(List<Transaction> transactions)
+        {
+            double sum = 0;
+
+            foreach (var transaction in transactions)
+            {
+                if (transaction.Betrag < 0)
+                {
+                    sum += transaction.Betrag;
+                }
+            }
+
+            return sum;
         }
 
         private void ImportCSVFile(string filePath)
@@ -100,6 +149,11 @@ namespace BankAnalyse
             }
 
             sr.Close();
+        }
+
+        private void beendenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }

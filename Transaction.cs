@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BankAnalyse
 {
-    class Transaction
+    class Transaction: IComparable<Transaction>
     {
         private DateTime date;
         private double betrag;
@@ -26,5 +26,10 @@ namespace BankAnalyse
         public DateTime Date { get => date; set => date = value; }
         public double Betrag { get => betrag; set => betrag = value; }
         public string Recipient { get => recipient; set => recipient = value; }
+
+        public int CompareTo(Transaction obj)
+        {
+            return Date.CompareTo(obj.Date);
+        }
     }
 }
